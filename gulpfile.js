@@ -3,6 +3,9 @@ const del = require("del");
 const fs = require("fs");
 const typescript = require("gulp-typescript");
 const tslint = require('gulp-tslint');
+const uglify = require('gulp-uglify');
+const cleanCSS = require('gulp-clean-css');
+const pako = require('gulp-pako');
 
 const browserSync = require('browser-sync');
 const reload = browserSync.reload;
@@ -63,6 +66,20 @@ gulp.task('tslint', function(){
     .pipe(tslint.report('verbose'));
 });
 
+gulp.task('minifycss', ['prepare'], function(){
+  return gulp
+    .src(paths.distFiles + ".css")
+    .pipe(cleanCSS({compatibility: 'ie8'}))
+    .pipe(gulp.dest(paths.dist));
+});
+
+gulp.task('minifyjs', ['prepare'], function(cb) {
+  return gulp
+    .src(paths.distFiles + ".js")
+    .pipe(uglify())
+    .pipe(gulp.dest(paths.dist));
+});
+
 gulp.task('serve', ['build'], function() {
   browserSync({
     server: {
@@ -73,6 +90,7 @@ gulp.task('serve', ['build'], function() {
   gulp.watch(paths.srcFiles, ['buildAndReload']);
 });
 
-gulp.task('build', ['tslint', 'clean', 'compile', 'copy:libs', 'copy:assets']);
+gulp.task('build', ['minifycss', 'minifyjs']);
+gulp.task('prepare', ['tslint', 'clean', 'compile', 'copy:libs', 'copy:assets']);
 gulp.task('buildAndReload', ['build'], reload);
 gulp.task('default', ['build']);

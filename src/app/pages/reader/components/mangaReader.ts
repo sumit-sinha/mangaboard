@@ -17,15 +17,16 @@ import {ApplicationService} from "app/common/services/applicationService";
                     	[style.height]="div_height + 'px'" 
                     	[style.width]="div_width + 'px'" 
                     	*ngFor="let page of pages">
-                    	<div class="img-loading show" *ngIf="page.loaded === false"></div>
+                    	
                     	<img src="{{ page.image }}" (load)="onImageLoad(page)" class="reader" alt="{{ page.number }}"/>
+                    	<div class="loading loading-position-absolute show" *ngIf="page.loaded === false"></div>
                     </li>
 
                     <li class="js_slide" 
                     	[style.height]="div_height + 'px'" 
                     	[style.width]="div_width + 'px'"
                     	*ngIf="pages == null || pages.length == 0">
-                    	<div class="img-loading show"></div>
+                    	<div class="loading loading-position-fixed show"></div>
                     </li>
                 </ul>
             </div>

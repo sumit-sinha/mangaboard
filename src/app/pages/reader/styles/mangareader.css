@@ -19,10 +19,6 @@ ul.slides.js_slides {
 	margin-left: -35px;
 }
 
-ul.no-slider div.img-loading {
-	position: fixed;
-}
-
 li {
 	margin: 0 auto;
     position: relative;
@@ -52,19 +48,4 @@ li {
 img.reader {
 	width: 100%;
 	height: 100%;
-}
-
-.img-loading {
-	position: absolute;
-	z-index: 10;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	color: #fff;
-	background: url(/static/images/loading.gif) no-repeat center rgba(0,0,0,0.3);
-	display: none;
-}
-.img-loading.show {
-	display: block;
 }
