@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<base href="/">
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<title>Manga Board</title>
+	<link href="static/styles/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+	<div class="loading"></div>
+	<manga-board>Loading...</manga-board>
+</body>
+
+<script src="node_modules/zone.js/dist/zone.min.js"></script>
+<script src="node_modules/reflect-metadata/Reflect.js"></script>
+<script src="node_modules/systemjs/dist/system.src.js"></script>
+<script src="static/scripts/lory.min.js"></script>
+<script src="system.config.js"></script>
+
+<script>
+  System.import('app').catch(function(err){ 
+  	console.error(err); 
+  });
+</script>
+
+</html>

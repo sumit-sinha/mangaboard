@@ -1,0 +1,24 @@
+.description {
+    margin-top: -10px;
+}
+
+img.card-img-top {
+    width: 100%;
+    height: 275px;
+}
+
+.description p {
+    padding: 15px;
+    padding-bottom: 0px;
+    text-align: justify;
+}
+
+p.date {
+	margin-bottom: 0;
+}
+
+li.search-feedback {
+	background-color: #0073b9;
+    border-radius: 0;
+    color: white;
+}

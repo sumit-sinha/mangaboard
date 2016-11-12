@@ -1,0 +1,12 @@
+.search-bar {
+	top: 5px;
+	right: 5px;
+	width: 45%;
+	z-index: 10001;
+	position: fixed;
+}
+.search-bar input {
+	border-radius: 0;
+	line-height: 25px;
+	font-size: 1.2em;
+}

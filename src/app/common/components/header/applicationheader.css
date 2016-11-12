@@ -1,0 +1,20 @@
+
+.navbar-custom {
+	text-align: center;
+	border-color: #1c73a5;
+	background-color: #3097d1;
+}
+
+a.navbar-custom {
+	color: white;
+}
+
+a.navbar-center {
+	float: none;
+}
+
+img.navbar-back {
+    height: 28px;
+    position: absolute;
+    left: 15px;
+}
