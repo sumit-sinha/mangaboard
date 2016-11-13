@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
-	<base href="/">
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -16,7 +15,9 @@
 
 <body>
 	<manga-board></manga-board>
-	<div class="loading loading-position-fixed show">please wait...</div>
+	<div class="loading loading-position-fixed show">
+		<span>please wait...</span>
+	</div>
 </body>
 
 <script src="node_modules/zone.js/dist/zone.min.js"></script>
@@ -27,9 +28,17 @@
 <script src="static/scripts/system.config.js"></script>
 
 <script>
-  System.import('app').catch(function(err){ 
-  	console.error(err); 
-  });
+	(function() {
+
+		var href = document.location.href;
+		var base = href.substring(0, href.lastIndexOf("/") + 1);
+
+		document.write("<base href='" + base + "' />");
+
+		System.import('app').catch(function(err){ 
+			console.error(err); 
+		});
+	}());
 </script>
 
 </html>
