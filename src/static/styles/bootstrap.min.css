@@ -11,6 +11,8 @@ html{font-family:sans-serif;line-height:1.15;-ms-text-size-adjust:100%;-webkit-t
 }
 .loading.show {
 	display: block;
+	padding-top: 78%;
+	text-align: center;
 }
 .loading.loading-position-fixed {
 	position: fixed;

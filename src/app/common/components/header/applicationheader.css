@@ -18,3 +18,9 @@ img.navbar-back {
     position: absolute;
     left: 15px;
 }
+
+img.navbar-search {
+    height: 38px;
+    position: absolute;
+    right: 15px;
+}

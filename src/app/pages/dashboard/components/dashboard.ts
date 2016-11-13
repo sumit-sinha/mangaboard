@@ -10,20 +10,22 @@ import {MangaSiteAjaxService} from "app/common/services/network/mangaSiteAjaxSer
 	selector: "dashboard",
 	template: `
 		<app-header [args]="header"></app-header>
-		<div class="search-bar">
-			<input type="search" class="form-control" placeholder="Search" (keyup)="onSearch($event)">
-		</div>
-		<infinite-scroll [onBottom]="scroll_callback">
-			<div class="list-group">
-			  <a class="list-group-item list-group-item-action" 
-			  	*ngFor="let manga of mangaList | arrayLength: manga_list_length" (click)="onCardClick(manga)">
-
-			    <h5 class="list-group-item-heading">{{ manga.name }}</h5>
-			    <p class="list-group-item-text" *ngIf="manga.description" [innerHTML]="manga.description | trim: 100"></p>
-			    <p class="list-group-item-text" *ngIf="manga.description == null">Description is not yet available. Please continue reading and we will fetch it for you later.</p>
-			  </a>
+		<div class="dashboard {{ dashboard_class }}">
+			<div class="search-bar">
+				<input type="search" class="form-control" placeholder="Search" (keyup)="onSearch($event)">
 			</div>
-		</infinite-scroll>
+			<infinite-scroll [onBottom]="scroll_callback">
+				<div class="list-group">
+				  <a class="list-group-item list-group-item-action" 
+				  	*ngFor="let manga of mangaList | arrayLength: manga_list_length" (click)="onCardClick(manga)">
+
+				    <h5 class="list-group-item-heading">{{ manga.name }}</h5>
+				    <p class="list-group-item-text" *ngIf="manga.description" [innerHTML]="manga.description | trim: 100"></p>
+				    <p class="list-group-item-text" *ngIf="manga.description == null">Description is not yet available. Please continue reading and we will fetch it for you later.</p>
+				  </a>
+				</div>
+			</infinite-scroll>
+		</div>
 	`,
 	styleUrls: ["app/pages/dashboard/components/dashboard.css"]
 })
@@ -36,9 +38,13 @@ export class Dashboard {
 
 	manga_name: string;
 
+	dashboard_class: string;
+
 	scroll_callback: Function;
 
 	manga_list_length: Number;
+
+	on_search_icon_click: Function;
 
 	private original_manga_list: Array;
 
@@ -90,14 +96,14 @@ export class Dashboard {
 			this._allLoaded(loadingMangaList, loadingPopularMangaList);
 		}
 
-		this.header = {
-			page: {
-				title: "Manga Board",
-				aligned: "left"
-			}
-		};
-
+		this.dashboard_class = "";
 		this.scroll_callback = this.onScrollToBottom.bind(this);
+		this.on_search_icon_click = this.onSearchClick.bind(this);
+
+		this.header = {
+			page: { title: "Manga Board", aligned: "left" },
+			search: { onClick: this.on_search_icon_click }
+		};
 	}
 
 	/**
@@ -138,6 +144,18 @@ export class Dashboard {
 			this.manga_list_length = 10;
 			this.mangaList = popularMangaList;
 			this.original_manga_list = popularMangaList;
+		}
+	}
+
+	/**
+	 * function called when search button is clicked
+	 * @param event {Object}
+	 */
+	onSearchClick(event: Object) {
+		if (this.dashboard_class !== "") {
+			this.dashboard_class = "";
+		} else {
+			this.dashboard_class = "search";
 		}
 	}
 

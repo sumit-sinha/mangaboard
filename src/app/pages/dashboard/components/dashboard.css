@@ -1,12 +1,21 @@
 .search-bar {
-	top: 5px;
-	right: 5px;
-	width: 45%;
+	left: 0;
+    right: 0;
+    top: 53px;
+	width: 100%;
+	opacity: 0.9;
 	z-index: 10001;
 	position: fixed;
+	display: none;
 }
 .search-bar input {
 	border-radius: 0;
 	line-height: 25px;
 	font-size: 1.2em;
+}
+.dashboard.search .list-group {
+	margin-top: 94px;
+}
+.dashboard.search .search-bar {
+	display: block;
 }

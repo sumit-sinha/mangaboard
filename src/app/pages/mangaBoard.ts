@@ -1,4 +1,5 @@
-import {Component} from "@angular/core";
+import {Component, OnInit} from "@angular/core";
+import {ApplicationService} from "app/common/services/applicationService";
 
 @Component({
 	selector: "manga-board",
@@ -10,6 +11,12 @@ import {Component} from "@angular/core";
 	styleUrls: ["app/pages/mangaBoard.css"]
 })
 
-export class MangaBoard {
+export class MangaBoard implements OnInit {
+	
+	constructor(private applicationService: ApplicationService) {}
 
+	ngOnInit() {
+		this.applicationService.hideOverlay();
+		this.applicationService.removeOverlayText();
+	}
 }

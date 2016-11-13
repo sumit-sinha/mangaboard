@@ -3,18 +3,18 @@ import {Injectable} from "@angular/core";
 @Injectable()
 export class ApplicationService {
 	
-	loading: any;
+	loadings: any;
 
 	constructor() {
-		this.loading = document.getElementsByClassName("loading");
+		this.loadings = document.getElementsByClassName("loading");
 	}
 
 	/**
 	 * method to show a overlay over page
 	 */
 	showOverlay() {
-		for (let i = 0; i < this.loading.length; i++) {
-			let loading = this.loading[i];
+		for (let i = 0; i < this.loadings.length; i++) {
+			let loading = this.loadings[i];
 			if (loading.className.indexOf("show") === -1) {
 				loading.className += " show";
 			}
@@ -25,9 +25,28 @@ export class ApplicationService {
 	 * method to hide the overlay from page
 	 */
 	hideOverlay() {
-		for (let i = 0; i < this.loading.length; i++) {
-			var loading = this.loading[i];
+		for (let i = 0; i < this.loadings.length; i++) {
+			let loading = this.loadings[i];
 			loading.className = loading.className.replace(new RegExp('(?:^|\\s)'+ 'show' + '(?:\\s|$)'), '');
+		}
+	}
+
+	/**
+	 * method to remove any text message shown while loading
+	 */
+	removeOverlayText() {
+		for (let i = 0; i < this.loadings.length; i++) {
+			this.loadings[i].innerHTML = "";
+		}
+	}
+
+	/**
+	 * method to add text message while loading
+	 * @param message {String}
+	 */
+	addOverlayText(message: string) {
+		for (let i = 0; i < this.loadings.length; i++) {
+			this.loadings[i].innerHTML = message;
 		}
 	}
 
