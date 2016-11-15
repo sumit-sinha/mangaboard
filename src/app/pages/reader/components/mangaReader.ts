@@ -64,8 +64,7 @@ export class MangaReader implements OnDestroy {
 		let body = document.body;
 		let html = document.documentElement;
 		let params = this.route.snapshot.params;
-
-		let manga = this.localStorageService.getMangaInformation(params["name"]);
+		let manga = this.appService.getMangaFromList(this.localStorageService.getMangaList(), params["name"]);
 
 		this.header = {
 			page: {title: this.appService.getTrimmedMangaName(manga.name, 18) + " " + params["chapter"]},

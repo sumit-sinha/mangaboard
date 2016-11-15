@@ -228,7 +228,7 @@ export class ParsePageService {
 
 		return {
 			pages: pages,
-			image: htmlHelper.getImageURL(imageTag);
+			image: htmlHelper.getImageURL(imageTag)
 		}
 	}
 }

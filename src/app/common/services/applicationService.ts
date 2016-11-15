@@ -73,4 +73,21 @@ export class ApplicationService {
 
 		return name;
 	}
+
+	/**
+	 * function to get manga object from Array
+	 * @param mangaList {Array}
+	 * @param name {String}
+	 * @return {Object}
+	 */
+	getMangaFromList = function(mangaList: Array, name: string) {		
+		for (let i = 0; i < mangaList.length; i++) {
+			let manga = mangaList[i];
+			if (name === this.parseMangaName(manga.name)) {
+				return manga;
+			}
+		}
+
+		return null;
+	}
 }

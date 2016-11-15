@@ -42,6 +42,8 @@ export class MangaDescription implements OnInit {
 
 	infinite_scroll_callback: Function;
 
+	favourite_click_callback: Function;
+
 	constructor(
 		private router: Router,
 		private ajax: MangaSiteAjaxService,
@@ -57,13 +59,8 @@ export class MangaDescription implements OnInit {
 	ngOnInit() {
 
 		let params = this.route.snapshot.params;
-
-		this.manga = this.localStorageService.getMangaInformation(params["name"]);
-
-		this.header = {
-			page: { title: this.appService.getTrimmedMangaName(this.manga.name, 18) },
-			showBack: true
-		}
+		
+		this.manga = this.appService.getMangaFromList(this.localStorageService.getMangaList(), params["name"]);
 		
 		if (this.manga.description == null || this.manga.listings == null) {
 			this.appService.showOverlay();
@@ -89,8 +86,18 @@ export class MangaDescription implements OnInit {
 				this.appService.hideOverlay();
 			}
 		);
-
+		
 		this.infinite_scroll_callback = this.onScrollToBottom.bind(this);
+		this.favourite_click_callback = this.onFavouriteIconClick.bind(this);
+
+		this.header = {
+			page: { title: this.appService.getTrimmedMangaName(this.manga.name, 18) },
+			favourite: { 
+				onClick: this.favourite_click_callback, 
+				selected: this.localStorageService.isMangaPinned({name: params["name"]}) 
+			},
+			showBack: true
+		}
 	}
 
 	/**
@@ -112,6 +119,20 @@ export class MangaDescription implements OnInit {
 	onChapterClick(event: Object, listing: Object) {
 		var linkParameters = listing.link.split("/");
 		this.router.navigate(["/manga", this.route.snapshot.params["name"], linkParameters[2], 1]);
+	}
+
+	/**
+	 * function called then favourite icon is clicked
+	 * @param event {Object}
+	 * @param args {Object}
+	 */
+	onFavouriteIconClick(event: Object, args: Object) {
+		let mangaName = this.route.snapshot.params["name"];
+		if (args.selected) {
+			this.localStorageService.addToPinnedMangaList({name: mangaName});
+		} else {
+			this.localStorageService.removeFromPinnedMangaList({name: mangaName})
+		}
 	}
 
 	/**

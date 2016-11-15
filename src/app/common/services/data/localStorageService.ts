@@ -9,8 +9,13 @@ export class LocalStorageService {
 	 * @return {Object}
 	 */
 	readFromStorage(args: Object): Object {
+
 		let data = localStorage.getItem(args.key);
-		return JSON.parse(data);
+		if (data != null) {
+			return JSON.parse(data);
+		}
+
+		return null;
 	}
 
 	/**
@@ -24,49 +29,90 @@ export class LocalStorageService {
 	}
 
 	/**
+	 * function to get all bookmarked manga
+	 * @return {Array}
+	 */
+	getPinnedMangaList(): Array {
+		return this.readFromStorage({key: "pinned_list"});
+	}
+
+	/**
+	 * function to check if manga is already in list
+	 * @param args {Object}
+	 * @return {boolean}
+	 */
+	isMangaPinned(args): boolean {
+		let pinnedList = this.getPinnedMangaList();
+		if (pinnedList == null) {
+			pinnedList = [];
+		}
+
+		for (let i = 0; i < pinnedList.length; i++) {
+			if (pinnedList[i] === args.name) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * function to remove manga from list
+	 * @param args {Object}
+	 */
+	removeFromPinnedMangaList(args: Object) {
+		let pinnedList = this.getPinnedMangaList();
+		if (pinnedList == null) {
+			pinnedList = [];
+		}
+
+		for (let i = 0; i < pinnedList.length; i++) {
+			if (pinnedList[i] === args.name) {
+				pinnedList.remove(args.name);
+			}
+		}
+
+		this.writeToStorage({
+			pinned_list: pinnedList
+		});
+	}
+
+	/**
+	 * function to add manga to list
+	 * @param args {Object}
+	 */
+	addToPinnedMangaList(args: Object): Array {
+
+		if (!this.isMangaPinned(args)) {
+			let pinnedList = this.getPinnedMangaList();
+			if (pinnedList == null) {
+				pinnedList = [];
+			}
+
+			pinnedList.push(args.name);
+			this.writeToStorage({
+				pinned_list: pinnedList
+			});
+		}
+		
+	}
+
+	/**
 	 * function to return a list of all manga
-	 * @return {Object}
+	 * @return {Array}
 	 */
 	getMangaList(): Object {
 		return this.readFromStorage({key: "manga_list"});
 	}
 
 	/**
-	 * function to return a list of manga as pinned by our user
-	 * @param args {Object}
-	 * @return {Array}
+	 * function to set a list of all manga
+	 * @param mangaList {Array}
 	 */
-	getPopularMangaList(args: Object): Array {
-		
-		let list = [];
-		let maximum = args && args.max;
-		let popularMangaList = this.readFromStorage({key: "popular_manga_list"});
-		
-		if (maximum == null || maximum > popularMangaList.length) {
-			maximum = popularMangaList.length;
-		}
-
-		for (let i = 0; i < maximum; i++) {
-			let popularManga = popularMangaList[i];
-			let name = popularManga.name;
-
-			list.push({
-				name: name,
-				cover: name + ".jpg"
-			});
-		}
-
-		return list;
-	}
-
-	/**
-	 * function to get information about manga based on name
-	 * @param name {String}
-	 * @return {Object}
-	 */
-	getMangaInformation(name: string): Object {
-		let mangaList = this.readFromStorage({key: "manga_list"});
-		return mangaList[name];
+	setMangaList(mangaList: Array) {
+		this.writeToStorage({ 
+			"manga_list": mangaList 
+		});
 	}
 
 	/**
@@ -74,9 +120,19 @@ export class LocalStorageService {
 	 * @param args {Object}
 	 */
 	updateMangaInformation(args: Object) {
-		let mangaList = this.readFromStorage({key: "manga_list"});
-		mangaList[args.key] = args.manga;
 
-		this.writeToStorage({"manga_list": mangaList});
+		let manga = args.manga;
+		let mangaList = this.getMangaList();
+
+		for (let i = 0; i < mangaList.length; i++) {
+			let codedMangaName = manga.name.replace(/ /gi, "-").replace(/:/gi, "").toLowerCase();
+			let codedMangaFromListName = mangaList[i].name.replace(/ /gi, "-").replace(/:/gi, "").toLowerCase();
+
+			if (codedMangaName === codedMangaFromListName) {
+				mangaList[i] = manga;
+			}
+		}
+
+		this.setMangaList(mangaList);
 	}
 }
