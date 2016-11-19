@@ -1,11 +1,11 @@
 import {Component, OnDestroy} from "@angular/core";
 import {ActivatedRoute} from '@angular/router';
 
+import {NetworkHelper} from "app/helpers/networkHelper";
 import {ParsePageHelper} from "app/helpers/parsePageHelper";
 
 import {ApplicationService} from "app/common/services/applicationService";
 import {LocalStorageService} from "app/common/services/data/localStorageService";
-import {MangaSiteAjaxService} from "app/common/services/network/mangaSiteAjaxService";
 
 @Component({
 	selector: "manga-reader",
@@ -39,7 +39,7 @@ import {MangaSiteAjaxService} from "app/common/services/network/mangaSiteAjaxSer
             </span>
         </div>
 	`,
-	styleUrls: ["app/pages/reader/styles/mangareader.css"]
+	styleUrls: ["app/pages/reader/components/mangareader.css"]
 })
 
 export class MangaReader implements OnDestroy {
@@ -54,10 +54,11 @@ export class MangaReader implements OnDestroy {
 
 	private slider: any;
 
+	private ajax: NetworkHelper;
+
 	private parsePage: ParsePageHelper;
 
 	constructor(
-		private ajax: MangaSiteAjaxService,
 		private localStorageService: LocalStorageService,
 		private route: ActivatedRoute,
 		private appService: ApplicationService
@@ -73,6 +74,7 @@ export class MangaReader implements OnDestroy {
 			showBack: true
 		};
 
+		this.ajax = NetworkHelper.getInstance();
 		this.parsePage = ParsePageHelper.getInstance();
 
 		this.div_width = Math.max(body.offsetWidth, html.clientWidth, html.offsetWidth);
@@ -101,53 +103,55 @@ export class MangaReader implements OnDestroy {
 		page.loaded = true;
 	}
 
+	/**
+	 * function to get all the images for a manga chapter
+	 * @param args {Object}
+	 */
 	_getAllImages(args: Object) {
 
 		this.ajax.getPageHTML({
 			site: "http://mangareader.net/",
 			prefix: args.name + "/" + args.chapter + "/" + args.page
-		}).subscribe(
-			data => {
+		}).then(data => {
 				
-				let pageInfo = this.parsePage.parseReaderPage({
-					html: data._body,
-					fetch_pages: args.fetch_pages
-				});
+			let pageInfo = this.parsePage.parseReaderPage({
+				html: data.text,
+				fetch_pages: args.fetch_pages
+			});
 
-				if (pageInfo.pages) {
-					for (let i = 0; i < pageInfo.pages.length; i++) {
+			if (pageInfo.pages) {
+				for (let i = 0; i < pageInfo.pages.length; i++) {
 
-						let page = pageInfo.pages[i];
+					let page = pageInfo.pages[i];
 
-						this.pages.push({
-							loaded: false,
-							link: page.link,
-							number: page.number
-						});
-					}
-				}
-
-				let pageNumber = parseInt(args.page);
-
-				this.pages[pageNumber - 1].image = pageInfo.image;
-
-				if (pageNumber < this.pages.length) {
-					this._getAllImages({
-						name: args.name, 
-						chapter: args.chapter, 
-						page: pageNumber + 1
+					this.pages.push({
+						loaded: false,
+						link: page.link,
+						number: page.number
 					});
 				}
-
-				if (args.create_slider) {
-					setTimeout(() => {
-						this.slider = lory(document.querySelector('.js_slider'), {
-							rewind: false
-						});
-					}, 100);
-				}
 			}
-		);
+
+			let pageNumber = parseInt(args.page);
+
+			this.pages[pageNumber - 1].image = pageInfo.image;
+
+			if (pageNumber < this.pages.length) {
+				this._getAllImages({
+					name: args.name, 
+					chapter: args.chapter, 
+					page: pageNumber + 1
+				});
+			}
+
+			if (args.create_slider) {
+				setTimeout(() => {
+					this.slider = lory(document.querySelector('.js_slider'), {
+						rewind: false
+					});
+				}, 100);
+			}
+		});
 	}
 
 }

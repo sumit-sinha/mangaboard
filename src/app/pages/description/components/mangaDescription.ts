@@ -1,114 +1,92 @@
 import {Component, OnInit} from "@angular/core";
 import {ActivatedRoute, Router} from '@angular/router';
 
+import {NetworkHelper} from "app/helpers/networkHelper";
 import {ParsePageHelper} from "app/helpers/parsePageHelper";
 
 import {ApplicationService} from "app/common/services/applicationService";
 import {LocalStorageService} from "app/common/services/data/localStorageService";
-import {MangaSiteAjaxService} from "app/common/services/network/mangaSiteAjaxService";
 
 @Component({
 	selector: "manga-description",
 	template: `
-		<app-header [args]="header"></app-header>
+		<app-header [args]="view.header"></app-header>
 		<div class="description">
-			<p (click)="onDescriptionClick()" [innerHTML]="manga.description | trim: description_length"></p>
+			<p (click)="onDescriptionClick()" [innerHTML]="view.manga.description | trim: view.descriptionLength"></p>
 		</div>
-		<infinite-scroll [onBottom]="infinite_scroll_callback">
+		<infinite-scroll [onBottom]="view.scrollCallback">
 			<ul class="list-group">
-				<li class="list-group-item search-feedback" *ngIf="!search_done && manga.listings">
+				<li class="list-group-item search-feedback" *ngIf="!view.searchDone && view.manga.listings">
 					<span class="name">Searching</span>
 					<p class="date">looking for new chapters...</p>
 				</li>
-				<li class="list-group-item" (click)="onChapterClick($event, listing)" *ngFor="let listing of manga.listings | reverse | arrayLength: manga_list_length">
+				<li class="list-group-item" (click)="onChapterClick($event, listing)" *ngFor="let listing of view.manga.listings | reverse | arrayLength: view.chaptersLength">
 					<span class="name">{{ listing.chapter.name }}{{ listing.chapter.title }}</span>
 					<p class="date">{{ listing.releaseDate | date: "dd MMM yyyy"}}</p>
 				</li>
 			</ul>
 		</infinite-scroll>
 	`,
-	styleUrls: ["app/pages/description/styles/mangadescription.css"]
+	styleUrls: ["app/pages/description/components/mangadescription.css"]
 })
 
 export class MangaDescription implements OnInit {
 	
-	manga: Object;
-
-	header: Object;
-
-	search_done: boolean;
-
-	manga_list_length: number;
-
-	description_length: number;
-
-	infinite_scroll_callback: Function;
-
-	favourite_click_callback: Function;
+	view: Object;
 
 	constructor(
 		private router: Router,
-		private ajax: MangaSiteAjaxService,
 		private localStorageService: LocalStorageService,
 		private route: ActivatedRoute,
 		private appService: ApplicationService
-	) {
-		this.manga_list_length = 10;
-		this.description_length = 400;
-	}
+	) {}
 
 	ngOnInit() {
 
+		let ajax = NetworkHelper.getInstance();
 		let params = this.route.snapshot.params;
-		
-		this.manga = this.appService.getMangaFromList(this.localStorageService.getMangaList(), params["name"]);
-		
-		if (this.manga.description == null || this.manga.listings == null) {
+		let manga = this.appService.getMangaFromList(this.localStorageService.getMangaList(), params["name"]);
+
+		this.view = {
+			manga: manga,
+			searchDone: false,
+			chaptersLength: 10,
+			descriptionLength: 400,
+			header: {
+				page: {
+					title: this.appService.getTrimmedMangaName(manga.name, 18)
+				},
+				favourite: {
+					onClick: this.onFavouriteIconClick.bind(this),
+					selected: this.localStorageService.isMangaPinned({name: params["name"]})
+				},
+				showBack: true
+			},
+			scrollCallback: this.onScrollToBottom.bind(this)
+		}
+
+		if (manga.description == null || manga.listings == null) {
 			this.appService.showOverlay();
 		}
-	
-		this.ajax.getPageHTML({
+
+		ajax.getPageHTML({
 			site: "http://mangareader.net/",
 			prefix: params["name"]
-		}).subscribe(
-			data => {
-				let mangaInfo = ParsePageHelper.getInstance().parseDescriptionPage({html: data._body});
-				this.manga.description = mangaInfo.description;
-				this.manga.listings = mangaInfo.listings;
-
-				this.localStorageService.updateMangaInformation({
-					manga: this.manga,
-					key: params["name"]
-				});
-			},
-			error => {},
-			() => {
-				this.search_done = true;
-				this.appService.hideOverlay();
-			}
-		);
-		
-		this.infinite_scroll_callback = this.onScrollToBottom.bind(this);
-		this.favourite_click_callback = this.onFavouriteIconClick.bind(this);
-
-		this.header = {
-			page: { title: this.appService.getTrimmedMangaName(this.manga.name, 18) },
-			favourite: { 
-				onClick: this.favourite_click_callback, 
-				selected: this.localStorageService.isMangaPinned({name: params["name"]}) 
-			},
-			showBack: true
-		}
+		}).then(data => {
+			this.onAjaxResponse(data);
+		}).catch(data => {
+			this.onAjaxResponse(data);
+		});
 	}
 
 	/**
 	 * function called to toggle between more or less description
 	 */
 	onDescriptionClick() {
-		if (this.description_length == null) {
-			this.description_length = 400;
+		if (this.view.descriptionLength == null) {
+			this.view.descriptionLength = 400;
 		} else {
-			this.description_length = null;
+			this.view.descriptionLength = null;
 		}
 	}
 
@@ -143,15 +121,36 @@ export class MangaDescription implements OnInit {
 	 */
 	onScrollToBottom(event: Object) {
 
-		if (this.manga.listings == null) {
+		if (this.view.manga.listings == null) {
 			return;
 		}
 
-		let newLength = this.manga_list_length + 5;
-		if (newLength > this.manga.listings.length) {
-			newLength = this.manga.listings.length;
+		let newLength = this.view.chaptersLength + 5;
+		if (newLength > this.view.manga.listings.length) {
+			newLength = this.view.manga.listings.length;
 		}
 
-		this.manga_list_length = newLength;
+		this.view.chaptersLength = newLength;
+	}
+
+	/**
+	 * function to handle ajax response
+	 * @param data {Object}
+	 */
+	private onAjaxResponse(data) {
+
+		if (data.text) {
+			let mangaInfo = ParsePageHelper.getInstance().parseDescriptionPage({html: data.text});
+			this.view.manga.description = mangaInfo.description;
+			this.view.manga.listings = mangaInfo.listings;
+
+			this.localStorageService.updateMangaInformation({
+				manga: this.view.manga,
+				key: params["name"]
+			});
+		}
+
+		this.view.searchDone = true;
+		this.appService.hideOverlay();
 	}
 }

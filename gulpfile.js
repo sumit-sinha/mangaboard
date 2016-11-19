@@ -5,7 +5,6 @@ const typescript = require("gulp-typescript");
 const tslint = require('gulp-tslint');
 const uglify = require('gulp-uglify');
 const cleanCSS = require('gulp-clean-css');
-const pako = require('gulp-pako');
 
 const browserSync = require('browser-sync');
 const reload = browserSync.reload;
@@ -31,7 +30,6 @@ gulp.task('copy:libs', ['clean'], function() {
       'node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js',
       'node_modules/@angular/platform-browser/bundles/platform-browser.umd.js',
       'node_modules/@angular/core/bundles/core.umd.js',
-      'node_modules/@angular/http/bundles/http.umd.js',
       'node_modules/@angular/router/bundles/router.umd.js',
       'node_modules/@angular/compiler/bundles/compiler.umd.js',
       'node_modules/@angular/common/bundles/common.umd.js',

@@ -1,101 +1,25 @@
 import {Component} from "@angular/core";
 import {Router} from '@angular/router';
 
+import {NetworkHelper} from "app/helpers/networkHelper";
 import {ParsePageHelper} from "app/helpers/parsePageHelper";
+import {MangaListHelper} from "app/pages/dashboard/helpers/mangaListHelper";
 
 import {ApplicationService} from "app/common/services/applicationService";
 import {LocalStorageService} from "app/common/services/data/localStorageService";
-import {MangaSiteAjaxService} from "app/common/services/network/mangaSiteAjaxService";
-
-
-let mangaListHelper = function() {
-	
-	return {
-
-		/**
-		 * method to merge manga list and popular manga together
-		 * @param popularMangaList {Array}
-		 * @param mangaList {Object}
-		 * @return {Object}
-		 */
-		mergePopularAndMangaList: function(popularMangaList: Array, mangaList: Object, appService: ApplicationService) {
-
-			mangaList = mangaList || {};
-			popularMangaList = popularMangaList || [];
-
-			for (let i = 0; i < popularMangaList.length; i++) {
-
-				let popularManga = popularMangaList[i];
-				let codedName = appService.parseMangaName(popularManga.name);
-
-				popularManga.description = mangaList[codedName].description;
-
-				delete mangaList[codedName];
-			}
-
-			for (let key in mangaList) {
-				if (mangaList.hasOwnProperty(key)) {
-
-					let manga = mangaList[key];
-
-					popularMangaList.push({
-						name: manga.name,
-						description: manga.description
-					});
-				}
-			}
-
-			return popularMangaList;
-		},
-
-		/**
-		 * method to merge manga list and pinned mangas together
-		 * @param pinnedMangaList {Array}
-		 * @param mangaList {Array}
-		 * @return {Array}
-		 */
-		mergePinnedAndMangaList: function(pinnedMangaList: Array, mangaList: Array, appService: ApplicationService) {
-
-			let list = [];
-			if (pinnedMangaList == null || pinnedMangaList.length == 0) {
-				return mangaList;
-			}
-
-			for (let i = 0; i < pinnedMangaList.length; i++) {
-				let manga = appService.getMangaFromList(mangaList, pinnedMangaList[i]);
-				if (manga != null) {
-					list.push(manga);
-					mangaList.remove(manga);
-				}
-			}
-
-			for (let key in mangaList) {
-				if (mangaList.hasOwnProperty(key)) {
-					let manga = mangaList[key];
-					list.push({
-						name: manga.name,
-						description: manga.description
-					});
-				}
-			}
-
-			return list;
-		}
-	}
-}();
 
 @Component({
 	selector: "dashboard",
 	template: `
-		<app-header [args]="header"></app-header>
-		<div class="dashboard {{ dashboard_class }}">
+		<app-header [args]="view.header"></app-header>
+		<div class="dashboard {{ view.dashboardClass }}">
 			<div class="search-bar">
 				<input type="search" class="form-control" placeholder="Search" (keyup)="onSearch($event)">
 			</div>
-			<infinite-scroll [onBottom]="scroll_callback">
+			<infinite-scroll [onBottom]="view.scrollCallback">
 				<div class="list-group">
 				  <a class="list-group-item list-group-item-action" 
-				  	*ngFor="let manga of mangaList | arrayLength: manga_list_length" (click)="onCardClick(manga)">
+				  	*ngFor="let manga of view.manga.list | arrayLength: view.manga.length" (click)="onCardClick(manga)">
 
 				    <h5 class="list-group-item-heading">{{ manga.name }}</h5>
 				    <p class="list-group-item-text" *ngIf="manga.description" [innerHTML]="manga.description | trim: 100"></p>
@@ -109,127 +33,37 @@ let mangaListHelper = function() {
 })
 
 export class Dashboard {
-	
-	header: Object;
 
-	mangaList: Array;
+	view: Object;
 
-	manga_name: string;
-
-	dashboard_class: string;
-
-	scroll_callback: Function;
-
-	manga_list_length: Number;
-
-	on_search_icon_click: Function;
-
-	private original_manga_list: Array;
+	private originalMangaList: Array;
 
 	constructor(
 		private router: Router,
-		private ajax: MangaSiteAjaxService, 
 		private applicationService: ApplicationService,
 		private localStorageService: LocalStorageService
 	) {
 		
-		let loadingMangaList = false;
-		let loadingPopularMangaList = false;
-
-		let popularMangaList = null;
-		let mangaList = localStorageService.getMangaList();
-
-		let parsePage = ParsePageHelper.getInstance();
-
-		if (mangaList == null || mangaList.length === 0) {
-
-			loadingMangaList = true;
-			loadingPopularMangaList = true;
-
-			applicationService.showOverlay();
-
-			ajax.getPageHTML({
-				site: "http://mangareader.net/",
-				prefix: "alphabetical"
-			}).subscribe(data => {
-				mangaList = parsePage.parseMangaListPage({html: data._body});
-			},error => {}, () => {
-				loadingMangaList = false;
-				this._allLoaded({
-					loading: {
-						manga_list: loadingMangaList, 
-						popular_manga_list: loadingPopularMangaList
-					},
-					list: {
-						manga_list: mangaList,
-						popular_manga_list: popularMangaList
-					}
-				});
-			});
-
-			ajax.getPageHTML({
-				site: "http://mangareader.net/"
-			}).subscribe(data => {				
-				popularMangaList = parsePage.parsePopularManga({html: data._body});
-			}, error => {}, () => {
-				loadingPopularMangaList = false;
-				this._allLoaded({
-					loading: {
-						manga_list: loadingMangaList, 
-						popular_manga_list: loadingPopularMangaList
-					},
-					list: {
-						manga_list: mangaList,
-						popular_manga_list: popularMangaList
-					}
-				});
-			});
-
-		} else {
-			this._allLoaded({
-				loading: {
-					manga_list: loadingMangaList, 
-					popular_manga_list: loadingPopularMangaList
+		this.view = {
+			manga: {
+				list: null,
+				length: null
+			},
+			dashboardClass: "",
+			scrollCallback: this.onScrollToBottom.bind(this),
+			header: {
+				page: {
+					aligned: "left",
+					title: "Manga Board"
 				},
-				list: {
-					manga_list: mangaList,
-					popular_manga_list: popularMangaList
+				search: {
+					onClick: this.onSearchClick.bind(this)
 				}
-			});
-		}
-
-		this.dashboard_class = "";
-		this.scroll_callback = this.onScrollToBottom.bind(this);
-		this.on_search_icon_click = this.onSearchClick.bind(this);
-
-		this.header = {
-			page: { title: "Manga Board", aligned: "left" },
-			search: { onClick: this.on_search_icon_click }
+			},
+			scrollCallback: this.onScrollToBottom.bind(this)
 		};
-	}
 
-	/**
-	 * function called when all the content is loaded from server
-	 * @param args {Object}
-	 */
-	_allLoaded(args: Object) {
-
-		if (args.loading.manga_list == false && args.loading.popular_manga_list == false) {
-
-			this.applicationService.hideOverlay();
-			
-			let mangaList = args.list.manga_list;
-			let pinnedMangaList = this.localStorageService.getPinnedMangaList();
-
-			if (args.list.popular_manga_list) {
-				mangaList = mangaListHelper.mergePopularAndMangaList(args.list.popular_manga_list, mangaList, this.applicationService);
-				this.localStorageService.setMangaList(mangaList);
-			}
-
-			this.manga_list_length = 10;
-			this.mangaList = mangaListHelper.mergePinnedAndMangaList(pinnedMangaList, mangaList, this.applicationService);
-			this.original_manga_list = this.mangaList;
-		}
+		this._loadMangaList(localStorageService);
 	}
 
 	/**
@@ -237,10 +71,10 @@ export class Dashboard {
 	 * @param event {Object}
 	 */
 	onSearchClick(event: Object) {
-		if (this.dashboard_class !== "") {
-			this.dashboard_class = "";
+		if (this.view.dashboardClass !== "") {
+			this.view.dashboardClass = "";
 		} else {
-			this.dashboard_class = "search";
+			this.view.dashboardClass = "search";
 		}
 	}
 
@@ -250,30 +84,34 @@ export class Dashboard {
 	 */
 	onScrollToBottom(event: Object) {
 
-		if (this.mangaList == null) {
+		if (this.view.manga.list == null) {
 			return;
 		}
 
-		let length = this.manga_list_length + 5;
-		if (length > this.mangaList.length) {
-			length = this.mangaList.length;
+		let length = this.view.manga.length + 5;
+		if (length > this.view.manga.list.length) {
+			length = this.view.manga.list.length;
 		}
 
-		this.manga_list_length = length;
+		this.view.manga.length = length;
 	}
 
+	/**
+	 * function called when user start searching for a new manga
+	 * @param event {Object}
+	 */
 	onSearch(event: Object) {
 		
 		let list = [];
-		for (let i = 0; i < this.original_manga_list.length; i++) {
-			let manga = this.original_manga_list[i];
+		for (let i = 0; i < this.originalMangaList.length; i++) {
+			let manga = this.originalMangaList[i];
 			if (manga.name.toLowerCase().indexOf(event.target.value.toLowerCase()) !== -1) {
 				list.push(manga);
 			}
 		}
 
-		this.manga_list_length = 10;
-		this.mangaList = list;
+		this.view.manga.length = 10;
+		this.view.manga.list = list;
 	}
 
 	/**
@@ -282,5 +120,79 @@ export class Dashboard {
 	 */
 	onCardClick(manga) {
 		this.router.navigate(["/manga", this.applicationService.parseMangaName(manga.name)]);
+	}
+
+	/**
+	 * function called from constructor to load list of mangas<br/>
+	 * content is loaded from server if not available in local storage
+	 */
+	private _loadMangaList() {
+		
+		let flag = {
+			loading: { mangaList: false, popularMangaList: false },
+			list: { popularMangaList: null, mangaList: this.localStorageService.getMangaList() }
+		};
+
+		let parsePage = ParsePageHelper.getInstance();
+
+		if (flag.list.mangaList == null || flag.list.mangaList.length === 0) {
+
+			let ajax = NetworkHelper.getInstance();
+
+			flag.loading.mangaList = true;
+			flag.loading.popularMangaList = true;
+
+			this.applicationService.showOverlay();
+
+			ajax.getPageHTML({
+				site: "http://mangareader.net/",
+				prefix: "alphabetical"
+			}).then(data => {
+				flag.loading.mangaList = false;
+				flag.list.mangaList = parsePage.parseMangaListPage({html: data.text});
+				this._allLoaded(flag);
+			}).catch(data => {
+				flag.loading.mangaList = false;
+				this._allLoaded(flag);
+			});
+
+			ajax.getPageHTML({
+				site: "http://mangareader.net/"
+			}).then(data => {
+				flag.loading.popularMangaList = false;
+				flag.list.popularMangaList = parsePage.parsePopularManga({html: data.text});
+				this._allLoaded(flag);
+			}).catch(data => {
+				flag.loading.popularMangaList = false;
+				this._allLoaded(flag);
+			});
+		} else {
+			this._allLoaded(flag);
+		}
+	}
+
+	/**
+	 * function called when all the content is loaded from server
+	 * @param flag {Object}
+	 */
+	private _allLoaded(flag: Object) {
+
+		if (flag.loading.mangaList == false && flag.loading.popularMangaList == false) {
+
+			let mangaList = flag.list.mangaList;
+			let mangaListHelper = MangaListHelper.getInstance();
+			let pinnedMangaList = this.localStorageService.getPinnedMangaList();
+
+			this.applicationService.hideOverlay();
+			
+			if (flag.list.popularMangaList) {
+				mangaList = mangaListHelper.mergePopularAndMangaList(flag.list.popularMangaList, mangaList, this.applicationService);
+				this.localStorageService.setMangaList(mangaList);
+			}
+
+			this.view.manga.length = 10;
+			this.view.manga.list = mangaListHelper.mergePinnedAndMangaList(pinnedMangaList, mangaList, this.applicationService);
+			this.originalMangaList = this.view.manga.list;
+		}
 	}
 }

@@ -1,7 +1,6 @@
 import {NgModule} from "@angular/core";
 import {BrowserModule} from "@angular/platform-browser";
 import {RouterModule} from "@angular/router";
-import {HttpModule} from "@angular/http";
 
 import {MangaBoard} from './pages/mangaBoard';
 import {InfiniteScroll} from "./common/components/scroller/infiniteScrolling";
@@ -16,11 +15,9 @@ import {ArrayLengthFilterPipe} from "./common/pipes/arrayLengthFilterPipe";
 
 import {ApplicationService} from "./common/services/applicationService";
 import {LocalStorageService} from "./common/services/data/localStorageService";
-import {MangaSiteAjaxService} from "./common/services/network/mangaSiteAjaxService";
 
 function getServices() {
   return [
-    MangaSiteAjaxService,
     LocalStorageService,
     ApplicationService
   ];
@@ -54,7 +51,6 @@ function getDeclarations() {
 
 @NgModule({
   imports: [ 
-    HttpModule,
     BrowserModule,
     RouterModule.forRoot([{
       path: "",
