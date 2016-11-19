@@ -1,9 +1,11 @@
 import {Component, OnInit} from "@angular/core";
 import {ActivatedRoute, Router} from '@angular/router';
-import {MangaSiteAjaxService} from "app/common/services/network/mangaSiteAjaxService";
-import {ParsePageService} from "app/common/services/data/parsePageService";
-import {LocalStorageService} from "app/common/services/data/localStorageService";
+
+import {ParsePageHelper} from "app/helpers/parsePageHelper";
+
 import {ApplicationService} from "app/common/services/applicationService";
+import {LocalStorageService} from "app/common/services/data/localStorageService";
+import {MangaSiteAjaxService} from "app/common/services/network/mangaSiteAjaxService";
 
 @Component({
 	selector: "manga-description",
@@ -48,7 +50,6 @@ export class MangaDescription implements OnInit {
 		private router: Router,
 		private ajax: MangaSiteAjaxService,
 		private localStorageService: LocalStorageService,
-		private parsePage: ParsePageService,
 		private route: ActivatedRoute,
 		private appService: ApplicationService
 	) {
@@ -71,7 +72,7 @@ export class MangaDescription implements OnInit {
 			prefix: params["name"]
 		}).subscribe(
 			data => {
-				let mangaInfo = this.parsePage.parseDescriptionPage({html: data._body});
+				let mangaInfo = ParsePageHelper.getInstance().parseDescriptionPage({html: data._body});
 				this.manga.description = mangaInfo.description;
 				this.manga.listings = mangaInfo.listings;
 

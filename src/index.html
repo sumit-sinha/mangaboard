@@ -28,17 +28,11 @@
 <script src="static/scripts/system.config.js"></script>
 
 <script>
-	(function() {
-
-		var href = document.location.href;
-		var base = href.substring(0, href.lastIndexOf("/") + 1);
-
-		document.write("<base href='" + base + "' />");
-
-		System.import('app').catch(function(err){ 
-			console.error(err); 
-		});
-	}());
+	System.import("app").then(function(file) {
+		file.AppHelper.getInstance(false).start();
+	}).catch(function(err){ 
+		console.error(err); 
+	});
 </script>
 
 </html>

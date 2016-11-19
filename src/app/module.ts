@@ -15,14 +15,12 @@ import {ReverseArrayPipe} from "./common/pipes/reverseArrayPipe";
 import {ArrayLengthFilterPipe} from "./common/pipes/arrayLengthFilterPipe";
 
 import {ApplicationService} from "./common/services/applicationService";
-import {ParsePageService} from "./common/services/data/parsePageService";
 import {LocalStorageService} from "./common/services/data/localStorageService";
 import {MangaSiteAjaxService} from "./common/services/network/mangaSiteAjaxService";
 
 function getServices() {
   return [
     MangaSiteAjaxService,
-    ParsePageService,
     LocalStorageService,
     ApplicationService
   ];

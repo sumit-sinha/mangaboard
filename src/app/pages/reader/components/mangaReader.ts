@@ -1,10 +1,11 @@
 import {Component, OnDestroy} from "@angular/core";
 import {ActivatedRoute} from '@angular/router';
 
-import {MangaSiteAjaxService} from "app/common/services/network/mangaSiteAjaxService";
-import {ParsePageService} from "app/common/services/data/parsePageService";
-import {LocalStorageService} from "app/common/services/data/localStorageService";
+import {ParsePageHelper} from "app/helpers/parsePageHelper";
+
 import {ApplicationService} from "app/common/services/applicationService";
+import {LocalStorageService} from "app/common/services/data/localStorageService";
+import {MangaSiteAjaxService} from "app/common/services/network/mangaSiteAjaxService";
 
 @Component({
 	selector: "manga-reader",
@@ -53,10 +54,11 @@ export class MangaReader implements OnDestroy {
 
 	private slider: any;
 
+	private parsePage: ParsePageHelper;
+
 	constructor(
 		private ajax: MangaSiteAjaxService,
 		private localStorageService: LocalStorageService,
-		private parsePage: ParsePageService,
 		private route: ActivatedRoute,
 		private appService: ApplicationService
 	) {
@@ -71,6 +73,8 @@ export class MangaReader implements OnDestroy {
 			showBack: true
 		};
 
+		this.parsePage = ParsePageHelper.getInstance();
+
 		this.div_width = Math.max(body.offsetWidth, html.clientWidth, html.offsetWidth);
 		this.div_height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, 
 								html.scrollHeight, html.offsetHeight) - 54;
@@ -83,7 +87,6 @@ export class MangaReader implements OnDestroy {
 			fetch_pages: true,
 			create_slider: true
 		});
-		
 	}
 
 	ngOnDestroy() {

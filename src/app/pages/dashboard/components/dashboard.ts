@@ -1,8 +1,9 @@
 import {Component} from "@angular/core";
 import {Router} from '@angular/router';
 
+import {ParsePageHelper} from "app/helpers/parsePageHelper";
+
 import {ApplicationService} from "app/common/services/applicationService";
-import {ParsePageService} from "app/common/services/data/parsePageService";
 import {LocalStorageService} from "app/common/services/data/localStorageService";
 import {MangaSiteAjaxService} from "app/common/services/network/mangaSiteAjaxService";
 
@@ -128,7 +129,6 @@ export class Dashboard {
 	constructor(
 		private router: Router,
 		private ajax: MangaSiteAjaxService, 
-		private parsePage: ParsePageService,
 		private applicationService: ApplicationService,
 		private localStorageService: LocalStorageService
 	) {
@@ -138,6 +138,8 @@ export class Dashboard {
 
 		let popularMangaList = null;
 		let mangaList = localStorageService.getMangaList();
+
+		let parsePage = ParsePageHelper.getInstance();
 
 		if (mangaList == null || mangaList.length === 0) {
 
