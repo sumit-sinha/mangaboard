@@ -1,11 +1,10 @@
 import {Component, OnInit} from "@angular/core";
 import {ActivatedRoute, Router} from '@angular/router';
 
+import {AppHelper} from "app/helpers/applicationHelper";
+import {StorageHelper} from "app/helpers/storageHelper";
 import {NetworkHelper} from "app/helpers/networkHelper";
 import {ParsePageHelper} from "app/helpers/parsePageHelper";
-
-import {ApplicationService} from "app/common/services/applicationService";
-import {LocalStorageService} from "app/common/services/data/localStorageService";
 
 @Component({
 	selector: "manga-description",
@@ -34,18 +33,23 @@ export class MangaDescription implements OnInit {
 	
 	view: Object;
 
+	private appHelper: AppHelper;
+
+	private storageHelper: StorageHelper;
+
 	constructor(
 		private router: Router,
-		private localStorageService: LocalStorageService,
-		private route: ActivatedRoute,
-		private appService: ApplicationService
-	) {}
+		private route: ActivatedRoute
+	) {
+		this.appHelper = AppHelper.getInstance();
+		this.storageHelper = StorageHelper.getInstance();
+	}
 
 	ngOnInit() {
 
 		let ajax = NetworkHelper.getInstance();
 		let params = this.route.snapshot.params;
-		let manga = this.appService.getMangaFromList(this.localStorageService.getMangaList(), params["name"]);
+		let manga = this.storageHelper.getMangaFromList(params["name"]);
 
 		this.view = {
 			manga: manga,
@@ -54,11 +58,11 @@ export class MangaDescription implements OnInit {
 			descriptionLength: 400,
 			header: {
 				page: {
-					title: this.appService.getTrimmedMangaName(manga.name, 18)
+					title: this.appHelper.getTrimmedMangaName(manga.name, 18)
 				},
 				favourite: {
 					onClick: this.onFavouriteIconClick.bind(this),
-					selected: this.localStorageService.isMangaPinned({name: params["name"]})
+					selected: this.storageHelper.isMangaPinned({name: params["name"]})
 				},
 				showBack: true
 			},
@@ -66,7 +70,7 @@ export class MangaDescription implements OnInit {
 		}
 
 		if (manga.description == null || manga.listings == null) {
-			this.appService.showOverlay();
+			this.appHelper.showOverlay();
 		}
 
 		ajax.getPageHTML({
@@ -108,9 +112,9 @@ export class MangaDescription implements OnInit {
 	onFavouriteIconClick(event: Object, args: Object) {
 		let mangaName = this.route.snapshot.params["name"];
 		if (args.selected) {
-			this.localStorageService.addToPinnedMangaList({name: mangaName});
+			this.storageHelper.addToPinnedMangaList({name: mangaName});
 		} else {
-			this.localStorageService.removeFromPinnedMangaList({name: mangaName})
+			this.storageHelper.removeFromPinnedMangaList({name: mangaName})
 		}
 	}
 
@@ -140,17 +144,20 @@ export class MangaDescription implements OnInit {
 	private onAjaxResponse(data) {
 
 		if (data.text) {
-			let mangaInfo = ParsePageHelper.getInstance().parseDescriptionPage({html: data.text});
-			this.view.manga.description = mangaInfo.description;
-			this.view.manga.listings = mangaInfo.listings;
 
-			this.localStorageService.updateMangaInformation({
+			let params = this.route.snapshot.params;
+			let mangaInfo = ParsePageHelper.getInstance().parseDescriptionPage({html: data.text});
+
+			this.view.manga.listings = mangaInfo.listings;
+			this.view.manga.description = mangaInfo.description;	
+
+			this.storageHelper.updateMangaInformation({
 				manga: this.view.manga,
 				key: params["name"]
 			});
 		}
 
 		this.view.searchDone = true;
-		this.appService.hideOverlay();
+		this.appHelper.hideOverlay();
 	}
 }

@@ -13,14 +13,8 @@ import {TrimStringPipe} from "./common/pipes/trimStringPipe";
 import {ReverseArrayPipe} from "./common/pipes/reverseArrayPipe";
 import {ArrayLengthFilterPipe} from "./common/pipes/arrayLengthFilterPipe";
 
-import {ApplicationService} from "./common/services/applicationService";
-import {LocalStorageService} from "./common/services/data/localStorageService";
-
 function getServices() {
-  return [
-    LocalStorageService,
-    ApplicationService
-  ];
+  return [];
 }
 
 function getPipes() {

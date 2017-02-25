@@ -1,3 +1,6 @@
+import {AppHelper} from "app/helpers/applicationHelper";
+import {StorageHelper} from "app/helpers/storageHelper";
+
 export class MangaListHelper {
 
 	private static instance: MangaListHelper;
@@ -17,7 +20,7 @@ export class MangaListHelper {
 	 * @param mangaList {Object}
 	 * @return {Object}
 	 */
-	mergePopularAndMangaList(popularMangaList: Array, mangaList: Object, appService: ApplicationService): Object {
+	mergePopularAndMangaList(popularMangaList: Array, mangaList: Object): Object {
 
 		mangaList = mangaList || {};
 		popularMangaList = popularMangaList || [];
@@ -25,7 +28,7 @@ export class MangaListHelper {
 		for (let i = 0; i < popularMangaList.length; i++) {
 
 			let popularManga = popularMangaList[i];
-			let codedName = appService.parseMangaName(popularManga.name);
+			let codedName = AppHelper.getInstance().encodeMangaName(popularManga.name);
 
 			popularManga.description = mangaList[codedName].description;
 
@@ -53,7 +56,7 @@ export class MangaListHelper {
 	 * @param mangaList {Array}
 	 * @return {Array}
 	 */
-	mergePinnedAndMangaList(pinnedMangaList: Array, mangaList: Array, appService: ApplicationService): Array {
+	mergePinnedAndMangaList(pinnedMangaList: Array, mangaList: Array): Array {
 
 		let list = [];
 		if (pinnedMangaList == null || pinnedMangaList.length == 0) {
@@ -61,7 +64,7 @@ export class MangaListHelper {
 		}
 
 		for (let i = 0; i < pinnedMangaList.length; i++) {
-			let manga = appService.getMangaFromList(mangaList, pinnedMangaList[i]);
+			let manga = StorageHelper.getInstance().getMangaFromList(pinnedMangaList[i], mangaList);
 			if (manga != null) {
 				list.push(manga);
 				mangaList.remove(manga);

@@ -21,8 +21,9 @@ export class NetworkHelper {
 		let prefix = args.prefix || "";
 
 		return this.request({
+			input: args,
 			method: "GET",
-			url: "https://crossorigin.me/" + args.site + prefix
+			url: "https://cors-anywhere.herokuapp.com/" + args.site + prefix
 		});
 	}
 
@@ -42,10 +43,12 @@ export class NetworkHelper {
 			xhr.onload = () => {
 				if (xhr.status >= 200 && xhr.status < 300) {
 					resolve({
-						text: xhr.response
+						text: xhr.response,
+						input: args.input
 					});
 				} else {
 					reject({
+						input: args.input,
 						status: xhr.status,
 						statusText: xhr.statusText
 					});
@@ -54,6 +57,7 @@ export class NetworkHelper {
 
 			xhr.onerror = () => {
 				reject({
+					input: args.input,
 					status: xhr.status,
 					statusText: xhr.statusText
 				});

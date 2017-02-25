@@ -2,11 +2,10 @@ import {Component} from "@angular/core";
 import {Router} from '@angular/router';
 
 import {NetworkHelper} from "app/helpers/networkHelper";
+import {StorageHelper} from "app/helpers/storageHelper";
+import {AppHelper} from "app/helpers/applicationHelper";
 import {ParsePageHelper} from "app/helpers/parsePageHelper";
 import {MangaListHelper} from "app/pages/dashboard/helpers/mangaListHelper";
-
-import {ApplicationService} from "app/common/services/applicationService";
-import {LocalStorageService} from "app/common/services/data/localStorageService";
 
 @Component({
 	selector: "dashboard",
@@ -36,13 +35,13 @@ export class Dashboard {
 
 	view: Object;
 
+	private appHelper: AppHelper;
+
 	private originalMangaList: Array;
 
-	constructor(
-		private router: Router,
-		private applicationService: ApplicationService,
-		private localStorageService: LocalStorageService
-	) {
+	private storageHelper: StorageHelper;
+
+	constructor(private router: Router) {
 		
 		this.view = {
 			manga: {
@@ -63,7 +62,9 @@ export class Dashboard {
 			scrollCallback: this.onScrollToBottom.bind(this)
 		};
 
-		this._loadMangaList(localStorageService);
+		this.appHelper = AppHelper.getInstance();
+		this.storageHelper = StorageHelper.getInstance();
+		this._loadMangaList();
 	}
 
 	/**
@@ -119,7 +120,7 @@ export class Dashboard {
 	 * @param manga {Object}
 	 */
 	onCardClick(manga) {
-		this.router.navigate(["/manga", this.applicationService.parseMangaName(manga.name)]);
+		this.router.navigate(["/manga", this.appHelper.encodeMangaName(manga.name)]);
 	}
 
 	/**
@@ -130,7 +131,7 @@ export class Dashboard {
 		
 		let flag = {
 			loading: { mangaList: false, popularMangaList: false },
-			list: { popularMangaList: null, mangaList: this.localStorageService.getMangaList() }
+			list: { popularMangaList: null, mangaList: this.storageHelper.getMangaList() }
 		};
 
 		let parsePage = ParsePageHelper.getInstance();
@@ -142,7 +143,7 @@ export class Dashboard {
 			flag.loading.mangaList = true;
 			flag.loading.popularMangaList = true;
 
-			this.applicationService.showOverlay();
+			this.appHelper.showOverlay();
 
 			ajax.getPageHTML({
 				site: "http://mangareader.net/",
@@ -181,17 +182,17 @@ export class Dashboard {
 
 			let mangaList = flag.list.mangaList;
 			let mangaListHelper = MangaListHelper.getInstance();
-			let pinnedMangaList = this.localStorageService.getPinnedMangaList();
+			let pinnedMangaList = this.storageHelper.getPinnedMangaList();
 
-			this.applicationService.hideOverlay();
+			this.appHelper.hideOverlay();
 			
 			if (flag.list.popularMangaList) {
-				mangaList = mangaListHelper.mergePopularAndMangaList(flag.list.popularMangaList, mangaList, this.applicationService);
-				this.localStorageService.setMangaList(mangaList);
+				mangaList = mangaListHelper.mergePopularAndMangaList(flag.list.popularMangaList, mangaList);
+				this.storageHelper.setMangaList(mangaList);
 			}
 
 			this.view.manga.length = 10;
-			this.view.manga.list = mangaListHelper.mergePinnedAndMangaList(pinnedMangaList, mangaList, this.applicationService);
+			this.view.manga.list = mangaListHelper.mergePinnedAndMangaList(pinnedMangaList, mangaList);
 			this.originalMangaList = this.view.manga.list;
 		}
 	}

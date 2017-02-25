@@ -1,11 +1,10 @@
 import {Component, OnDestroy} from "@angular/core";
 import {ActivatedRoute} from '@angular/router';
 
+import {AppHelper} from "app/helpers/applicationHelper";
+import {StorageHelper} from "app/helpers/storageHelper";
 import {NetworkHelper} from "app/helpers/networkHelper";
 import {ParsePageHelper} from "app/helpers/parsePageHelper";
-
-import {ApplicationService} from "app/common/services/applicationService";
-import {LocalStorageService} from "app/common/services/data/localStorageService";
 
 @Component({
 	selector: "manga-reader",
@@ -58,19 +57,15 @@ export class MangaReader implements OnDestroy {
 
 	private parsePage: ParsePageHelper;
 
-	constructor(
-		private localStorageService: LocalStorageService,
-		private route: ActivatedRoute,
-		private appService: ApplicationService
-	) {
+	constructor(private route: ActivatedRoute) {
 
 		let body = document.body;
 		let html = document.documentElement;
 		let params = this.route.snapshot.params;
-		let manga = this.appService.getMangaFromList(this.localStorageService.getMangaList(), params["name"]);
+		let manga = StorageHelper.getInstance().getMangaFromList(params["name"]);
 
 		this.header = {
-			page: {title: this.appService.getTrimmedMangaName(manga.name, 18) + " " + params["chapter"]},
+			page: {title: AppHelper.getInstance().getTrimmedMangaName(manga.name, 18) + " " + params["chapter"]},
 			showBack: true
 		};
 
