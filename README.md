@@ -18,13 +18,11 @@ Desktop browsers are supported though use your mobile device for best performanc
 Tech Stack and Third Party Dependencies
 ---------------------------------------------
 
-This application is developed using **Angular2** with **Typescript**. **Gulp** is used to configure typescript compilation and build. **BrowserSync** is used to easily re-deploy the changes during development.
-
-All the content shown in UI is fetch using ajax call to manga hosting sites. All the HTML string is parsed in Javascript with help of **Regular Expression** and is converted into meaningful objects and list. 
+This application is developed using **Angular2** with **Typescript** and **Gulp** is used to configure its compilation and build. Also **BrowserSync** is used to easily re-deploy the changes during development.
 
 **CORS Proxy**
 
-Since CORS call is not directly supported with ajax, we are using a CORS proxy - https://cors-anywhere.herokuapp.com to help overcome this issue.
+All the content shown in UI is fetch using ajax call to various manga hosting sites. HTML string is parsed in Javascript with help of **Regular Expression** and then it is converted into meaningful objects and list. Since CORS call is not directly supported with ajax, we are using a CORS proxy - https://cors-anywhere.herokuapp.com to help overcome this issue.
 
 **Lory**
 
@@ -33,5 +31,5 @@ Lory is a touch enabled minimalistic slider written in vanilla JavaScript. More 
 Server
 ----------
 
-To start the server use the below command from root folder
-**npm run start**
+>To start the server use the below command from root folder
+>**npm run start**
