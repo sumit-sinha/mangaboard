@@ -32,4 +32,5 @@ Server
 ----------
 
 >To start the server use the below command from root folder
+
 >**npm run start**
