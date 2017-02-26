@@ -15,10 +15,6 @@
     display: inline-block;
 }
 
-ul.slides.js_slides {
-	margin-left: -35px;
-}
-
 li {
 	margin: 0 auto;
     position: relative;
