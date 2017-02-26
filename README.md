@@ -18,7 +18,7 @@ Desktop browsers are supported though use your mobile device for best performanc
 Tech Stack and Third Party Dependencies
 ---------------------------------------------
 
-This application is developed using **Angular2** with **Typescript**. **Gulp** is used to configure typescript compilation and build. **BrowserSync** is used for development to easily re-deploy the changes during development.
+This application is developed using **Angular2** with **Typescript**. **Gulp** is used to configure typescript compilation and build. **BrowserSync** is used to easily re-deploy the changes during development.
 
 All the content shown in UI is fetch using ajax call to manga hosting sites. All the HTML string is parsed in Javascript with help of **Regular Expression** and is converted into meaningful objects and list. 
 
