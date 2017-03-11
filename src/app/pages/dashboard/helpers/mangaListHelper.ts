@@ -42,6 +42,7 @@ export class MangaListHelper {
 
 				popularMangaList.push({
 					name: manga.name,
+					cover: manga.cover,
 					description: manga.description
 				});
 			}
@@ -76,6 +77,7 @@ export class MangaListHelper {
 				let manga = mangaList[key];
 				list.push({
 					name: manga.name,
+					cover: manga.cover,
 					description: manga.description
 				});
 			}

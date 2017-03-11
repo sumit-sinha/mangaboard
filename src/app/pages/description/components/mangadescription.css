@@ -22,3 +22,9 @@ li.search-feedback {
     border-radius: 0;
     color: white;
 }
+
+.cover-image {
+    height: 400px;
+    margin-top: -10px;
+    background-size: cover;
+}

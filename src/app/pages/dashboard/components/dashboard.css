@@ -19,3 +19,10 @@
 .dashboard.search .search-bar {
 	display: block;
 }
+.dashboard .media-body {
+	padding-left: 10px !important;
+}
+.dashboard .list-group .media img {
+	width: 64px;
+	height: 64px;
+}

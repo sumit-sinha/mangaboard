@@ -17,13 +17,16 @@ import {MangaListHelper} from "app/pages/dashboard/helpers/mangaListHelper";
 			</div>
 			<infinite-scroll [onBottom]="view.scrollCallback">
 				<div class="list-group">
-				  <a class="list-group-item list-group-item-action" 
-				  	*ngFor="let manga of view.manga.list | arrayLength: view.manga.length" (click)="onCardClick(manga)">
-
-				    <h5 class="list-group-item-heading">{{ manga.name }}</h5>
-				    <p class="list-group-item-text" *ngIf="manga.description" [innerHTML]="manga.description | trim: 100"></p>
-				    <p class="list-group-item-text" *ngIf="manga.description == null">Description is not yet available. Please continue reading and we will fetch it for you later.</p>
-				  </a>
+				  <div class="media list-group-item" *ngFor="let manga of view.manga.list | arrayLength: view.manga.length" (click)="onCardClick(manga)">
+                    <a class="pull-left" href="javascript:void(0);">
+                        <img class="media-object" src="{{ manga.cover || '/static/images/noimage.png' }}" alt="manga" (error)="onImageLoadError(event, manga)">
+                    </a>
+                    <div class="media-body">
+                      <h5 class="media-heading">{{ manga.name }}</h5>
+                      <p class="list-group-item-text" *ngIf="manga.description" [innerHTML]="manga.description | trim: 100"></p>
+				      <p class="list-group-item-text" *ngIf="manga.description == null">Description is not yet available. Please continue reading and we will fetch it for you later.</p>
+                    </div>
+                  </div>
 				</div>
 			</infinite-scroll>
 		</div>
@@ -65,6 +68,15 @@ export class Dashboard {
 		this.appHelper = AppHelper.getInstance();
 		this.storageHelper = StorageHelper.getInstance();
 		this._loadMangaList();
+	}
+
+	/**
+	 * function called when image load fails
+	 * @param event {Object}
+	 * @param manga {Object}
+	 */
+	onImageLoadError(event: Object, manga: Object) {
+		manga.cover = "/static/images/noimage.png";
 	}
 
 	/**

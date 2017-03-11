@@ -10,6 +10,7 @@ import {ParsePageHelper} from "app/helpers/parsePageHelper";
 	selector: "manga-description",
 	template: `
 		<app-header [args]="view.header"></app-header>
+		<div *ngIf="view.manga.cover" class="cover-image" [ngStyle]="{'background-image': 'url(' + view.manga.cover + ')'}">&nbsp;</div>
 		<div class="description">
 			<p (click)="onDescriptionClick()" [innerHTML]="view.manga.description | trim: view.descriptionLength"></p>
 		</div>
@@ -148,6 +149,7 @@ export class MangaDescription implements OnInit {
 			let params = this.route.snapshot.params;
 			let mangaInfo = ParsePageHelper.getInstance().parseDescriptionPage({html: data.text});
 
+			this.view.manga.cover = mangaInfo.cover;
 			this.view.manga.listings = mangaInfo.listings;
 			this.view.manga.description = mangaInfo.description;	
 
