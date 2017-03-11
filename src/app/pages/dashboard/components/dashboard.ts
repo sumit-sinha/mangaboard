@@ -18,7 +18,7 @@ import {MangaListHelper} from "app/pages/dashboard/helpers/mangaListHelper";
 			<infinite-scroll [onBottom]="view.scrollCallback">
 				<div class="list-group">
 				  <div class="media list-group-item" *ngFor="let manga of view.manga.list | arrayLength: view.manga.length" (click)="onCardClick(manga)">
-                    <a class="pull-left" href="javascript:void(0);">
+                    <a class="media-image" href="javascript:void(0);">
                         <img class="media-object" src="{{ manga.cover || '/static/images/noimage.png' }}" alt="manga" (error)="onImageLoadError(event, manga)">
                     </a>
                     <div class="media-body">

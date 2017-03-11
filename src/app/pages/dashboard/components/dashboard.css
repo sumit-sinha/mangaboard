@@ -26,3 +26,6 @@
 	width: 64px;
 	height: 64px;
 }
+.dashboard .media-image {
+	display: table-cell;
+}
